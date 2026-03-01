@@ -47,6 +47,13 @@ export default function Index() {
     onError: (error: unknown) => {
       console.log("🟡 Handled error + manually sent to NR:", error);
 
+      // DEBUG: Check if error has stack trace
+      const err = error as Error;
+      console.log("🔍 Error.stack exists?", !!err.stack);
+      console.log("🔍 Error.stack content:", err.stack);
+      console.log("🔍 Error.message:", err.message);
+      console.log("🔍 Error.name:", err.name);
+
       // Manually send to New Relic (like production)
       console.log(
         "🔍 Checking window.newrelic:",
@@ -54,13 +61,18 @@ export default function Index() {
       );
       if (typeof window !== "undefined" && window.newrelic) {
         console.log("📤 Calling noticeError with:", error);
-        window.newrelic.noticeError(error as Error);
+        console.log("📤 Error object being sent:", {
+          message: err.message,
+          name: err.name,
+          stack: err.stack,
+        });
+        window.newrelic.noticeError(err);
         console.log("✅ noticeError called successfully");
       } else {
         console.error("❌ window.newrelic not available!");
       }
 
-      toast.error(`Handled + NR: ${(error as Error).message}`);
+      toast.error(`Handled + NR: ${err.message}`);
     },
   });
 
@@ -86,19 +98,30 @@ export default function Index() {
     onError: (error: unknown) => {
       console.log("🟡 Nested handled error + NR:", error);
 
+      // DEBUG: Check if error has stack trace
+      const err = error as Error;
+      console.log("🔍 Nested: Error.stack exists?", !!err.stack);
+      console.log("🔍 Nested: Error.stack content:", err.stack);
+      console.log("🔍 Nested: Error.message:", err.message);
+
       console.log(
         "🔍 Nested: Checking window.newrelic:",
         typeof window !== "undefined" ? window.newrelic : "SSR",
       );
       if (typeof window !== "undefined" && window.newrelic) {
         console.log("📤 Nested: Calling noticeError");
-        window.newrelic.noticeError(error as Error);
+        console.log("📤 Nested: Error object being sent:", {
+          message: err.message,
+          name: err.name,
+          stack: err.stack,
+        });
+        window.newrelic.noticeError(err);
         console.log("✅ Nested: noticeError called");
       } else {
         console.error("❌ Nested: window.newrelic not available!");
       }
 
-      toast.error(`Nested handled: ${(error as Error).message}`);
+      toast.error(`Nested handled: ${err.message}`);
     },
   });
 
@@ -136,6 +159,12 @@ export default function Index() {
       throw new Error("Error caught in try-catch block");
     } catch (error) {
       console.log("🟡 Error caught in catch:", error);
+
+      // DEBUG: Check if error has stack trace
+      const err = error as Error;
+      console.log("🔍 Try-Catch: Error.stack exists?", !!err.stack);
+      console.log("🔍 Try-Catch: Error.stack content:", err.stack);
+
       toast.error(
         `Caught: ${error instanceof Error ? error.message : "Unknown error"}`,
       );
