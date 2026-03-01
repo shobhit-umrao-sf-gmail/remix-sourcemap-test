@@ -8,7 +8,8 @@
     "dev": "remix vite:dev --port 3000",
     "start": "remix-serve ./build/server/index.js",
     "typecheck": "tsc",
-    "upload-sourcemaps": "node scripts/upload-sourcemaps.js"
+    "upload-sourcemaps": "node scripts/upload-sourcemaps.js",
+    "list-sourcemaps": "node scripts/list-sourcemaps.js"
   },
   "dependencies": {
     "@newrelic/browser-agent": "^1.310.1",
