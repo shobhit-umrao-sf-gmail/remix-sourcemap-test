@@ -41,28 +41,49 @@ export default function Index() {
     timestamp: new Date().toISOString()
   })
 
-  // React Query mutation with HANDLED error (onError callback)
+  // React Query mutation with HANDLED error + manual NR reporting (like production)
+  const handledMutationWithNR = useMutation({
+    mutationFn: failingApiCall,
+    onError: (error: unknown) => {
+      console.log('🟡 Handled error + manually sent to NR:', error)
+
+      // Manually send to New Relic (like production)
+      if (typeof window !== 'undefined' && window.newrelic) {
+        window.newrelic.noticeError(error as Error)
+        console.log('📤 Manually sent to NR via noticeError()')
+      }
+
+      toast.error(`Handled + NR: ${(error as Error).message}`)
+    },
+  })
+
+  // React Query mutation with HANDLED error (no manual NR call)
   const handledMutation = useMutation({
     mutationFn: failingApiCall,
-    onError: (error) => {
-      console.log('🟡 Handled error in onError callback:', error)
-      toast.error(`Handled error: ${error.message}`)
-      // Error is caught here - does NR still see it?
+    onError: (error: unknown) => {
+      console.log('🟡 Handled error (no manual NR call):', error)
+      toast.error(`Handled only: ${(error as Error).message}`)
+      // Error is caught here - does NR still see it naturally?
     },
   })
 
   // React Query mutation with UNHANDLED error (no onError)
   const unhandledMutation = useMutation({
     mutationFn: failingApiCall,
-    // No onError - error will bubble up
+    // No onError - error will bubble up naturally
   })
 
-  // React Query mutation with nested error + handler
+  // React Query mutation with nested error + handler + manual NR
   const nestedHandledMutation = useMutation({
     mutationFn: failingApiCallNested,
-    onError: (error) => {
-      console.log('🟡 Nested handled error:', error)
-      toast.error(`Nested handled: ${error.message}`)
+    onError: (error: unknown) => {
+      console.log('🟡 Nested handled error + NR:', error)
+
+      if (typeof window !== 'undefined' && window.newrelic) {
+        window.newrelic.noticeError(error as Error)
+      }
+
+      toast.error(`Nested handled: ${(error as Error).message}`)
     },
   })
 
@@ -162,15 +183,23 @@ export default function Index() {
             disabled={handledMutation.isPending}
             style={{ padding: '0.75rem', fontSize: '1rem', cursor: 'pointer', background: '#ffc', border: '1px solid #aa0' }}
           >
-            🟡 React Query Handled Error (onError) {handledMutation.isPending && '(Loading...)'}
+            🟡 React Query Handled (NO manual NR) {handledMutation.isPending && '(Loading...)'}
+          </button>
+
+          <button
+            onClick={() => handledMutationWithNR.mutate()}
+            disabled={handledMutationWithNR.isPending}
+            style={{ padding: '0.75rem', fontSize: '1rem', cursor: 'pointer', background: '#e7f5ff', border: '1px solid #0066cc' }}
+          >
+            📤 React Query + noticeError() (PROD PATTERN) {handledMutationWithNR.isPending && '(Loading...)'}
           </button>
 
           <button
             onClick={() => nestedHandledMutation.mutate()}
             disabled={nestedHandledMutation.isPending}
-            style={{ padding: '0.75rem', fontSize: '1rem', cursor: 'pointer', background: '#ffc', border: '1px solid #aa0' }}
+            style={{ padding: '0.75rem', fontSize: '1rem', cursor: 'pointer', background: '#e7f5ff', border: '1px solid #0066cc' }}
           >
-            🟡 React Query Nested + Handled {nestedHandledMutation.isPending && '(Loading...)'}
+            📤 Nested + noticeError() {nestedHandledMutation.isPending && '(Loading...)'}
           </button>
         </div>
       </div>
