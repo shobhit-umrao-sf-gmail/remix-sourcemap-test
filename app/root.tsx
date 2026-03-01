@@ -1,16 +1,31 @@
-import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "@remix-run/react"
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query"
-import toast, { Toaster } from "react-hot-toast"
-import { useState } from "react"
+import {
+  Links,
+  Meta,
+  Outlet,
+  Scripts,
+  ScrollRestoration,
+} from "@remix-run/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import toast, { Toaster } from "react-hot-toast";
+import { useState } from "react";
 
 // Extend Window interface for New Relic
 declare global {
   interface Window {
     newrelic?: {
-      noticeError: (error: Error, customAttributes?: Record<string, unknown>) => void
-      setCustomAttribute: (name: string, value: string | number | boolean) => void
-      addPageAction: (name: string, attributes?: Record<string, unknown>) => void
-    }
+      noticeError: (
+        error: Error,
+        customAttributes?: Record<string, unknown>,
+      ) => void;
+      setCustomAttribute: (
+        name: string,
+        value: string | number | boolean,
+      ) => void;
+      addPageAction: (
+        name: string,
+        attributes?: Record<string, unknown>,
+      ) => void;
+    };
   }
 }
 
@@ -26,34 +41,52 @@ export default function App() {
             refetchOnMount: false,
             refetchOnReconnect: false,
             onError: (error: unknown) => {
-              console.log({ error, place: "query-client-on-error" })
-              const errorMessage = (error as Error)?.message || "An unknown error occurred"
+              console.log({ error, place: "query-client-on-error" });
+              const errorMessage =
+                (error as Error)?.message || "An unknown error occurred";
 
               // Manually send to New Relic (like production)
+              console.log(
+                "🔍 Query onError: window.newrelic exists?",
+                !!window.newrelic,
+              );
               if (typeof window !== "undefined" && window.newrelic) {
-                window.newrelic.noticeError(error as Error)
+                console.log("📤 Query: Calling noticeError");
+                window.newrelic.noticeError(error as Error);
+                console.log("✅ Query: noticeError called");
+              } else {
+                console.error("❌ Query: window.newrelic NOT available");
               }
 
-              toast.error(errorMessage)
+              toast.error(errorMessage);
             },
           },
           mutations: {
             retry: false,
             onError: (error: unknown) => {
-              console.log({ error, place: "mutation-client-on-error" })
-              const errorMessage = (error as Error)?.message || "An unknown error occurred"
+              console.log({ error, place: "mutation-client-on-error" });
+              const errorMessage =
+                (error as Error)?.message || "An unknown error occurred";
 
               // Manually send to New Relic (like production)
+              console.log(
+                "🔍 Mutation onError: window.newrelic exists?",
+                !!window.newrelic,
+              );
               if (typeof window !== "undefined" && window.newrelic) {
-                window.newrelic.noticeError(error as Error)
+                console.log("📤 Mutation: Calling noticeError");
+                window.newrelic.noticeError(error as Error);
+                console.log("✅ Mutation: noticeError called");
+              } else {
+                console.error("❌ Mutation: window.newrelic NOT available");
               }
 
-              toast.error(errorMessage)
+              toast.error(errorMessage);
             },
           },
         },
-      })
-  )
+      }),
+  );
 
   return (
     <html lang="en">
@@ -62,7 +95,9 @@ export default function App() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <Meta />
         <Links />
-        {process.env.NODE_ENV === "production" && <script type="text/javascript" src="/js/newrelic.js" />}
+        {process.env.NODE_ENV === "production" && (
+          <script type="text/javascript" src="/js/newrelic.js" />
+        )}
       </head>
       <body>
         <QueryClientProvider client={queryClient}>
@@ -73,5 +108,5 @@ export default function App() {
         </QueryClientProvider>
       </body>
     </html>
-  )
+  );
 }
