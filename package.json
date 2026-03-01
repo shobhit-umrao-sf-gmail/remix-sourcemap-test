@@ -1,0 +1,33 @@
+{
+  "name": "remix-sourcemap-test",
+  "private": true,
+  "sideEffects": false,
+  "type": "module",
+  "scripts": {
+    "build": "remix vite:build",
+    "dev": "remix vite:dev --port 3000",
+    "start": "remix-serve ./build/server/index.js",
+    "typecheck": "tsc",
+    "upload-sourcemaps": "node scripts/upload-sourcemaps.js"
+  },
+  "dependencies": {
+    "@newrelic/browser-agent": "^1.310.1",
+    "@newrelic/publish-sourcemap": "^5.1.4",
+    "@remix-run/node": "^2.16.7",
+    "@remix-run/react": "^2.16.7",
+    "@remix-run/serve": "^2.16.7",
+    "isbot": "^4.4.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@remix-run/dev": "^2.16.7",
+    "@types/node": "^22.19.13",
+    "@types/react": "^18.3.28",
+    "@types/react-dom": "^18.3.7",
+    "remix-flat-routes": "^0.6.5",
+    "typescript": "^5.9.3",
+    "vite": "^6.4.1",
+    "vite-tsconfig-paths": "^5.1.4"
+  }
+}
